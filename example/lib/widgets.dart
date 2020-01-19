@@ -57,34 +57,6 @@ class ScanResultTile extends StatelessWidget {
     );
   }
 
-  String getNiceHexArray(List<int> bytes) {
-    return '[${bytes.map((i) => i.toRadixString(16).padLeft(2, '0')).join(', ')}]'
-        .toUpperCase();
-  }
-
-  String getNiceManufacturerData(Map<int, List<int>> data) {
-    if (data.isEmpty) {
-      return null;
-    }
-    List<String> res = [];
-    data.forEach((id, bytes) {
-      res.add(
-          '${id.toRadixString(16).toUpperCase()}: ${getNiceHexArray(bytes)}');
-    });
-    return res.join(', ');
-  }
-
-  String getNiceServiceData(Map<String, List<int>> data) {
-    if (data.isEmpty) {
-      return null;
-    }
-    List<String> res = [];
-    data.forEach((id, bytes) {
-      res.add('${id.toUpperCase()}: ${getNiceHexArray(bytes)}');
-    });
-    return res.join(', ');
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -96,106 +68,17 @@ class ScanResultTile extends StatelessWidget {
 
 class ServiceTile extends StatelessWidget {
   final BluetoothService service;
-  final List<CharacteristicTile> characteristicTiles;
+  final List<String> characteristicTiles;
 
   const ServiceTile({Key key, this.service, this.characteristicTiles})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    if (characteristicTiles.length > 0) {
-      return ExpansionTile(
-        title: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text('Service'),
-            Text('0x${service.uuid.toString().toUpperCase().substring(4, 8)}',
-                style: Theme.of(context)
-                    .textTheme
-                    .body1
-                    .copyWith(color: Theme.of(context).textTheme.caption.color))
-          ],
-        ),
-        children: characteristicTiles,
-      );
-    } else {
-      return ListTile(
-        title: Text('Service'),
-        subtitle:
-            Text('0x${service.uuid.toString().toUpperCase().substring(4, 8)}'),
-      );
-    }
-  }
-}
-
-class CharacteristicTile extends StatelessWidget {
-  final BluetoothCharacteristic characteristic;
-  final List<DescriptorTile> descriptorTiles;
-  final VoidCallback onReadPressed;
-  final VoidCallback onWritePressed;
-  final VoidCallback onNotificationPressed;
-
-  const CharacteristicTile(
-      {Key key,
-      this.characteristic,
-      this.descriptorTiles,
-      this.onReadPressed,
-      this.onWritePressed,
-      this.onNotificationPressed})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<List<int>>(
-      stream: characteristic.value,
-      initialData: characteristic.lastValue,
-      builder: (c, snapshot) {
-        final value = snapshot.data;
-        return ExpansionTile(
-          title: ListTile(
-            title: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text('Characteristic'),
-                Text(
-                    '0x${characteristic.uuid.toString().toUpperCase().substring(4, 8)}',
-                    style: Theme.of(context).textTheme.body1.copyWith(
-                        color: Theme.of(context).textTheme.caption.color))
-              ],
-            ),
-            subtitle: Text(value.toString()),
-            contentPadding: EdgeInsets.all(0.0),
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              IconButton(
-                icon: Icon(
-                  Icons.file_download,
-                  color: Theme.of(context).iconTheme.color.withOpacity(0.5),
-                ),
-                onPressed: onReadPressed,
-              ),
-              IconButton(
-                icon: Icon(Icons.file_upload,
-                    color: Theme.of(context).iconTheme.color.withOpacity(0.5)),
-                onPressed: onWritePressed,
-              ),
-              IconButton(
-                icon: Icon(
-                    characteristic.isNotifying
-                        ? Icons.sync_disabled
-                        : Icons.sync,
-                    color: Theme.of(context).iconTheme.color.withOpacity(0.5)),
-                onPressed: onNotificationPressed,
-              )
-            ],
-          ),
-          children: descriptorTiles,
-        );
-      },
+    return ListTile(
+      title: Text('Service'),
+      subtitle:
+          Text('0x${service.uuid.toString().toUpperCase().substring(4, 8)}'),
     );
   }
 }
@@ -228,25 +111,6 @@ class DescriptorTile extends StatelessWidget {
         stream: descriptor.value,
         initialData: descriptor.lastValue,
         builder: (c, snapshot) => Text(snapshot.data.toString()),
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          IconButton(
-            icon: Icon(
-              Icons.file_download,
-              color: Theme.of(context).iconTheme.color.withOpacity(0.5),
-            ),
-            onPressed: onReadPressed,
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.file_upload,
-              color: Theme.of(context).iconTheme.color.withOpacity(0.5),
-            ),
-            onPressed: onWritePressed,
-          )
-        ],
       ),
     );
   }
