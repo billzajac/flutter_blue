@@ -3,13 +3,49 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_blue_example/widgets.dart';
+import 'package:audioplayers/audio_cache.dart';
+
+var ping;
+var pingDelay = 1000;
+var pingCounter = 0;
+var pingCountMax = 5;
+var pingSecondsMax = 15;
+
+startPing() {
+  cancelPing("Cancelling ping to restart");
+  ping = Timer.periodic(Duration(milliseconds: pingDelay), (ping) {
+    print('Ping: $pingCounter at ${DateTime.now()}');
+    // https://stackoverflow.com/questions/43813386/how-to-play-a-custom-sound-in-flutter
+    // https://pub.dev/packages/audioplayers
+    AudioCache audioCache = new AudioCache();
+    audioCache.play('ping.mp3');
+    pingCounter++;
+    if (pingCounter >= pingCountMax) {
+      print("Cancelling ping after $pingCountMax iterations");
+      ping.cancel();
+    }
+  });
+}
+
+cancelPing([String message]) {
+  if (ping !=null && ping.isActive) {
+    if(message != null) {
+      print(message);
+    }
+    ping.cancel();
+    pingCounter = 0;
+  }
+}
 
 void main() {
+  Timer(Duration(seconds: pingSecondsMax), () {
+    cancelPing("Cancelling ping after $pingSecondsMax seconds");
+  });
+
   runApp(FlutterBlueApp());
 }
 
@@ -67,6 +103,8 @@ class BluetoothOffScreen extends StatelessWidget {
 class FindDevicesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+      startPing(); // Start pinging with the initial delay
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Find Devices'),

@@ -4,14 +4,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
-import 'package:audioplayers/audio_cache.dart';
-import 'package:audioplayers/audioplayers.dart';
 
 class ScanResultTile extends StatelessWidget {
   const ScanResultTile({Key key, this.result, this.onTap}) : super(key: key);
 
   final ScanResult result;
   final VoidCallback onTap;
+  startPing(); // Start pinging with the initial delay
+
 
   Widget _buildTitle(BuildContext context) {
     if (result.device.name.length > 0) {
@@ -36,12 +36,6 @@ class ScanResultTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // https://stackoverflow.com/questions/43813386/how-to-play-a-custom-sound-in-flutter
-    // https://pub.dev/packages/audioplayers
-    // Play the ping
-    AudioCache player = new AudioCache();
-    player.play('ping.mp3', mode: PlayerMode.LOW_LATENCY);
-
     return ListTile(
       title: _buildTitle(context),
       leading: Text(result.rssi.toString()),
